@@ -67,12 +67,12 @@ class MyQuiz:
                while True:
                 
                 
-                print("            1.Start Test. ")
-                print("            2.LeaderBoard. ")
-                print("            3.Show History.")
-                print("            4.Current History")
-                print("            5.Export Result. ")
-                print("            6.Exit")
+                print("\n1.Start Test. ")
+                print("2.LeaderBoard. ")
+                print("3.Show History.")
+                print("4.Current History")
+                print("5.Export Result. ")
+                print("6.Exit")
 
                 choice = int(input("\nSelect : "))
 
@@ -87,7 +87,7 @@ class MyQuiz:
                 elif choice == 5:
                        self.ExportResult()
                 elif choice == 6:
-                    break
+                    return
                 else:
                     print("\nInvalid Choice")
             
@@ -140,6 +140,8 @@ class MyQuiz:
                        self.showCurrentHistory()
                   elif choice == 5:
                         self.ExportResult()
+                  elif choice == 6:
+                      return
                   else:
                         print("\nInvalid Choice")
                  else:
@@ -334,13 +336,19 @@ class MyQuiz:
             except:
                 print("\nInvalid Input")
                 continue
-
+            
+            if ans < 1 or ans > 4:
+                print("Wrong choice skipped")
+                continue
             options = [q[2], q[3], q[4], q[5]]
 
             total += q[7]  
+    
+            selected_answer = options[ans - 1].strip().lower()
+            correct_answer = q[6].strip().lower()
 
-          if options[ans-1].strip().lower() == q[6].strip().lower():
-                score += q[7]
+            if selected_answer == correct_answer:
+                 score += q[7]
 
        
           print(f"\nFinal Score: {score} out of {total}")
