@@ -9,7 +9,7 @@ class MyQuiz:
         try:
             self.conn = mysql.connector.connect(
                 host="localhost",  
-                user="root",
+                user="root",      
                 password="himi1229",
                 database="MyPython",
                 port=3306
@@ -52,8 +52,8 @@ class MyQuiz:
             if name == "" or email == "" or password == "":
              print("\nAll fields are required")
              
-            elif not name.isalpha():
-                print("\nInvalid Name")
+            elif not name.replace(" ", "").isalpha():
+              print("Invalid Name")
                 
             elif "@gmail.com" not in email:
                 print("\nEmail is Not Valid")
@@ -160,7 +160,7 @@ class MyQuiz:
             password = input("Enter Password : ")
         
             if "@gmail.com" not in email:    
-                print("\nCheck it again !")
+                print("\nCheck it again !\n")
                 continue
             
             self.cur.execute("Select * From Admin Where email = %s AND password = %s",(email, password))
@@ -177,9 +177,10 @@ class MyQuiz:
                 print("2.Add Subject ")
                 print("3.Delete Question. ")
                 print("4.Show Question ") 
-                print("5.LeaderBoard ") 
-                print("6.Viwe Result ") 
-                print("7.Exit") 
+                print("5.Create Set ")
+                print("6.LeaderBoard ") 
+                print("7.Viwe Result ") 
+                print("8.Exit ") 
                 
                 choice = int(input("\nSelect : "))
                 
@@ -191,11 +192,13 @@ class MyQuiz:
                     self.deleteQuestion()
                 elif choice == 4:
                     self.showAll()
-                elif choice == 5: 
-                    self.LeaderBoard() 
+                elif choice == 5:
+                    self.Set()
                 elif choice == 6: 
+                    self.LeaderBoard()  
+                elif choice == 7: 
                     self.view_all_results()
-                elif choice == 7:
+                elif choice == 8:
                     return
                 
                 else: print("\nInvalid Choice") 
@@ -209,41 +212,73 @@ class MyQuiz:
             
     def addQuestion(self):
         try:
-                self.cur.execute("Select * From categories")
+                
+                self.cur.execute("SELECT * FROM categories")
                 categories = self.cur.fetchall()
                 
                 for c in categories:
                     print(c)
                     
-                categ_id = int(input("Enter Category ID: "))
-                set_no = int(input("Enter Set No. "))
-                marks = int(input("Enter Mark. "))
+                categ_id = int(input("Enter Category ID . "))
                 
+                self.cur.execute(
+                "SELECT set_no FROM sets WHERE categ_id = %s",
+                 (categ_id,)   )
+                sets = self.cur.fetchall()
                 
+                if not sets:
+                  print("\nNot found")
+                  return
                 
-                    
+                print("\nAvailable Sets:")
+                available_sets = []
+                
+                for s in sets:
+                 print("Set No:", s[0])
+                 available_sets.append(s[0])
+                  
+                set_no = int(input("Enter Set No: ")) 
+                  
+                if set_no not in available_sets:
+                  print("\nInvalid Set Number ")
+                  print("Please select from existing sets only")
+                  return
+              
+                marks = int(input("Enter Mark: "))
+                
                 question = input("Enter Question: ")
                 op1 = input("Option 1: ")
                 op2 = input("Option 2: ")
                 op3 = input("Option 3: ")
                 op4 = input("Option 4: ")
                 correct = input("Correct Answer: ")
-                difficulty = input("Difficulty (easy/medium/hard): ")
-                  
-               
-                 
+                difficulty = input("Enter Difficulty (easy/medium/hard): ").lower()
+                
+                if not all([question, op1, op2, op3, op4, correct]):
+                  print("Error: Please fill all fields")
+                  return
+
+                if difficulty not in ["easy", "medium", "hard"]:
+                  print("Invalid Difficulty")
+                  return
+ 
+                
+              
                 if difficulty == "easy" or difficulty == "medium" or difficulty == "hard":
-                    
-                 self.cur.execute("""
-                      INSERT INTO questions
-                      (categ_id,set_no, question_text, option1, option2, option3, option4, correct_answer, difficulty, marks)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                       """, (categ_id,set_no, question, op1, op2, op3, op4, correct, difficulty, marks))
-                 self.conn.commit()
-                 print("\nQuestion Added")
+
+                   self.cur.execute("""
+                   INSERT INTO questions
+                   (categ_id, set_no, question_text, option1, option2, option3, option4, correct_answer, difficulty, marks)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    """,(
+                   categ_id, set_no, question, op1, op2, op3, op4,
+                   correct, difficulty, marks
+                   ))
+                   self.conn.commit()
+                   print("\nQuestion Added Successfully")
                 else:
-                    print("\nWrong Condition Select")
-                    
+                    print("\nWrong Difficulty Selected ")
+
         except Exception as e:
                 print("Error > ",e)
         
@@ -251,10 +286,17 @@ class MyQuiz:
 
     def deleteQuestion(self):
         try:
-            setno = int(input("Enter Set No. "))
+                    
+            self.cur.execute("SELECT * FROM categories")
+            categories = self.cur.fetchall()
+
+            for c in categories:
+             print(c)
+             
+            cat_id = int(input("Select Subject : "))
             qid = int(input("Enter Question id : "))
             
-            self.cur.execute("DELETE FROM questions WHERE set_no = %s AND question_id = %s", (setno,qid))
+            self.cur.execute("DELETE FROM questions WHERE categ_id=%s AND question_id = %s", (cat_id,qid))
             
             self.conn.commit()
             
@@ -271,14 +313,34 @@ class MyQuiz:
     def showAll(self):
       
       try:  
-        self.cur.execute("Select * From questions ")
-        data = self.cur.fetchall()
+          
+        print("1. Show All Questions with Question id . ")
+        print("2.Show All Question with Options and Answer. ")
+        print("3.Show Questions for set. ")
         
-        if len(data) == 0:
+        choice = int(input("Enter Choice . "))
+        
+        if choice == 1:
+            self.cur.execute("Select question_text From questions")
+            data = self.cur.fetchall()
+        
+            if len(data) == 0:
+             print("\nNo Questions Found")
+             return  
+         
+            for row in data:
+              print("Question:", row[0])
+            
+                
+        elif choice == 2:
+         self.cur.execute("Select  * From questions")
+         data = self.cur.fetchall()
+        
+         if len(data) == 0:
             print("\nNo Questions Found")
             return  
            
-        for row in data:
+         for row in data:
             print("\n------------------------")
             print("ID:", row[0])
             print("Category ID:", row[1])
@@ -290,7 +352,26 @@ class MyQuiz:
             print("Correct Answer:", row[7])
             print("Difficulty:", row[8])
             print("------------------------")
-
+            
+        elif choice == 3:
+            Set = int(input("Enter Set Number . "))
+            self.cur.execute("Select question_text, question_text From questions Where set_no= %s",(Set,))
+            data = self.cur.fetchall()
+            
+            
+            print("\n---------------------------------------------------------------------")  
+            if len(data) == 0:
+             print("\nNo Questions Found")
+             return  
+         
+            for row in data:
+              print("Question:", row[0])
+             
+            print("\n---------------------------------------------------------------------")  
+            
+        else:
+                print("Wrong Input !")
+ 
       except Exception as e:
           print("Error > ",e)
            
@@ -314,7 +395,7 @@ class MyQuiz:
           self.cur.execute("""
             SELECT question_id, question_text, option1, option2, option3, option4, correct_answer, marks
             FROM questions
-            WHERE categ_id=%s AND difficulty=%s AND set_no=%s
+            WHERE categ_id=%s AND difficulty=%s AND set_no=%s  
             ORDER BY RAND()
             LIMIT 5
         """, (categ_id, difficulty, set_no))
@@ -453,24 +534,40 @@ class MyQuiz:
 
         data = self.cur.fetchall()
 
-        print("\n--- ALL RESULTS ---")
+        print("\n================ ALL RESULTS ================\n")
+
+        if not data:
+            print("No results found")
+            return
 
         for row in data:
-            print(row)      
-            
+            print("User Name        :", row[0])
+            print("Category         :", row[1])
+            print("Gain Marks       :", row[2])
+            print("Total Marks      :", row[3])
+            print("Date & Time      :", row[4])
+            print("--------------------------------------------")
+
 
 #----------------Add Subject Method----------------------------------------           
           
     def addSubject(self):
         try:
             
-            newQ = input("Enter Subject Name : ")
+            newQ = input("Enter Subject Name : ").strip()
             
             if newQ != "":
-                
-             self.cur.execute("Insert into categories (categ_name) VALUES (%s)",(newQ,))
-             self.conn.commit()
-             print("\nSubject is Added")
+              
+             self.cur.execute("Select * From categories Where categ_name = %s",(newQ,))
+             data = self.cur.fetchone()
+             
+             if data: 
+                 
+                 print("\nSubject is already exist")
+             else:
+               self.cur.execute("Insert into categories (categ_name) VALUES (%s)",(newQ,))
+               self.conn.commit()
+               print("\nSubject is Added")
             else:
                 print("\nNo Data inserted ")
                 
@@ -503,6 +600,40 @@ class MyQuiz:
 
      except Exception as e:
         print("Error > ", e)   
+        
+
+#----------------Check Set----------------------------------------           
+
+    
+    def Set(self):
+     try:
+        self.cur.execute("SELECT * FROM categories")
+        for row in self.cur.fetchall():
+            print(row)
+
+        categ_id = int(input("Enter Category ID: "))
+        setNo = int(input("Enter Set No: "))
+
+        self.cur.execute(
+            "SELECT * FROM sets WHERE categ_id = %s AND set_no = %s",
+            (categ_id, setNo)
+        )
+
+        data = self.cur.fetchone()
+
+        if data:
+            print("Set already exists")
+        else:
+            self.cur.execute(
+                "INSERT INTO sets (categ_id, set_no) VALUES (%s, %s)",
+                (categ_id, setNo)
+            )
+            self.conn.commit()
+            print("Set Added Successfully")
+
+     except Exception as e:
+        print("Error >", e)
+            
 #----------------Createtion Object and main Menu----------------------------------------           
        
 q = MyQuiz()
