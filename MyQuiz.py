@@ -121,7 +121,7 @@ class MyQuiz:
                  
                  while True:
                  
-                  print("     1.Start Test. ")
+                  print("\n     1.Start Test. ")
                   print("     2.LeaderBoard. ")
                   print("     3.Show History.")
                   print("     4.Current History")
@@ -173,7 +173,7 @@ class MyQuiz:
               while True: 
                 
                 print("\n--------------------\n")
-                print("1.Add Question. ")
+                print("\n1.Add Question. ")
                 print("2.Add Subject ")
                 print("3.Delete Question. ")
                 print("4.Show Question ") 
@@ -257,13 +257,7 @@ class MyQuiz:
                 if not all([question, op1, op2, op3, op4, correct]):
                   print("Error: Please fill all fields")
                   return
-
-                if difficulty not in ["easy", "medium", "hard"]:
-                  print("Invalid Difficulty")
-                  return
- 
                 
-              
                 if difficulty == "easy" or difficulty == "medium" or difficulty == "hard":
 
                    self.cur.execute("""
@@ -387,11 +381,22 @@ class MyQuiz:
             print(c)
 
           categ_id = int(input("Select Category ID: "))
+          self.cur.execute("SELECT * FROM categories WHERE categ_id=%s", (categ_id,))
+          if not self.cur.fetchone():
+            print("Invalid Category ID")
+            return
+
           difficulty = input("Enter Difficulty (easy / medium / hard): ")
+          
+          if difficulty not in ["easy", "medium", "hard"]:
+            print("\nInvalid Difficulty")
+            return
+
           set_no = int(input("Enter Set No: "))
           
-         
           
+         
+           
           self.cur.execute("""
             SELECT question_id, question_text, option1, option2, option3, option4, correct_answer, marks
             FROM questions
@@ -573,7 +578,9 @@ class MyQuiz:
                 
         except Exception as e:
             print("Error > ",e)       
-            
+    
+ #----------------Show Current History Method----------------------------------------           
+      
      
     def showCurrentHistory(self):
      try:
