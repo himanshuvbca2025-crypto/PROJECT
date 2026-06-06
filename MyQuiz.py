@@ -21,7 +21,7 @@ class MyQuiz:
             print("Error:", e)
             
             
-#----------------UserMethod---------------------------------------- 
+#----------------UserMethod----------------------------------------
           
     def User(self):
         
@@ -44,27 +44,47 @@ class MyQuiz:
     def registration(self):
         
         try:
-           
-            name = input("Enter Name : ")
-            email = input("Enter Email : ")
-            password = input("Enter Password : ")
-            
-            if name == "" or email == "" or password == "":
-             print("\nAll fields are required")
              
-            elif not name.replace(" ", "").isalpha():
-              print("Invalid Name")
+            while True:
+                name = input("Enter Name : ").strip()
+                if not name:
+                  print("\nName are required")
+                  continue
+                if not name.replace(" ", "").isalpha():
+                   print("Invalid Name")
+                   continue
+                break
+            
+            while True:
+                email = input("Enter Email : ").strip()
                 
-            elif "@gmail.com" not in email:
-                print("\nEmail is Not Valid")
-                
-            else:
-               self.cur.execute("""Insert Into user (name, email, password) Values (%s,%s,%s )""", 
+                if not email:
+                  print("\nemail are required")
+                  continue
+                if "@gmail.com" not in email:
+                  print("\nEmail is not valid")
+                  continue
+                break
+            
+            while True:
+                password = input("Enter Password : ").strip()
+
+                if not password:
+                 print("\nPassword field is required")
+                 continue
+
+                break
+
+            
+            
+            self.cur.execute("""Insert Into user (name, email, password) Values (%s,%s,%s )""", 
                              (name, email, password))
-               self.conn.commit()
-               self.user_id = self.cur.lastrowid
-               print("\n----------Registerd----------")
-               while True:
+            self.conn.commit()
+            self.user_id = self.cur.lastrowid
+            print("\n----------Registerd----------")
+               
+           
+            while True:
                 
                 
                 print("\n1.Start Test. ")
@@ -95,8 +115,7 @@ class MyQuiz:
             print("Error > ",e)
  
 #----------------UserLogin Method----------------------------------------          
-
-           
+         
     def userLogin(self):
         
         try:  
@@ -109,7 +128,7 @@ class MyQuiz:
              
                if "@gmail.com" not in email :
                     
-                    print("\nCheck it again")
+                    print("\nEmail is not valid")
                     continue
                self.cur.execute("Select * from user Where email = %s AND password = %s",(email, password))
                data = self.cur.fetchone()
@@ -144,7 +163,7 @@ class MyQuiz:
                       return
                   else:
                         print("\nInvalid Choice")
-                 else:
+               else:
                    print("\nNot Found")
                    
         except Exception as e:
@@ -181,7 +200,7 @@ class MyQuiz:
                 print("6.LeaderBoard ") 
                 print("7.Viwe Result ") 
                 print("8.Exit ") 
-                
+               
                 choice = int(input("\nSelect : "))
                 
                 if choice == 1:
@@ -208,7 +227,7 @@ class MyQuiz:
       except Exception as e:
          print("Error > ",e)
         
-#----------------Add Question Method----------------------------------------           
+#----------------Add Question Method----------------------------------------      
             
     def addQuestion(self):
         try:
@@ -218,17 +237,29 @@ class MyQuiz:
                 
                 for c in categories:
                     print(c)
-                    
-                categ_id = int(input("Enter Category ID . "))
                 
-                self.cur.execute(
-                "SELECT set_no FROM sets WHERE categ_id = %s",
-                 (categ_id,)   )
-                sets = self.cur.fetchall()
+                while True:    
+                 categ_id = input("Enter Category ID . ").strip()
+                 
+                 if not categ_id:
+                     print("\nCategory ID is required")
+                     continue
+                 
+                 if not categ_id.isdigit():
+                     print("\nPlease enter valid Category ID")
+                     continue
+
+                 categ_in = int(categ_id)
+                 
+                 self.cur.execute(
+                 "SELECT set_no FROM sets WHERE categ_id = %s",
+                 (categ_in,)   )
+                 sets = self.cur.fetchall()
                 
-                if not sets:
-                  print("\nNot found")
-                  return
+                 if sets:
+                  break
+                 else:
+                  print("Invalid ! Try Again")
                 
                 print("\nAvailable Sets:")
                 available_sets = []
@@ -236,24 +267,94 @@ class MyQuiz:
                 for s in sets:
                  print("Set No:", s[0])
                  available_sets.append(s[0])
+                 
+                while True:
+                   set_no = input("Enter Set No: ").strip()
                   
-                set_no = int(input("Enter Set No: ")) 
-                  
-                if set_no not in available_sets:
-                  print("\nInvalid Set Number ")
-                  print("Please select from existing sets only")
-                  return
+                   if not set_no :
+                     print("\nInvalid Set Number ")
+                     print("Please select from existing sets only")
+                     continue
+                 
+                   set_no = int(set_no) 
+                   
+                   if set_no not in available_sets:
+                       print("\nInvalid Set Number")
+                       print("Please select from existing sets only")
+                       continue 
+                   break
+               
+               
+                while True:
+                 marks = input("Enter Mark: ")
+                 
+                 if not marks:
+                     print("Marks are required ")
+                     continue
+                 
+                 if not marks.isdigit():
+                   print("\nPlease enter valid marks")
+                   continue
+                 marks = int(marks)
+                 break
+                 
+                
+                while True:
+                 question = input("Enter Question: ").strip()
+                 if not question:
+                  print("\nQuestion is required")
+                  continue
+                 break
+
+                while True:
+                  op1 = input("Option 1: ").strip()
+                  if not op1:
+                   print("\nOption 1 is required")
+                   continue
+                  break
+
+                while True:
+                  op2 = input("Option 2: ").strip()
+                  if not op2:
+                   print("\nOption 2 is required")
+                   continue
+                  break
+
+                while True:
+                   op3 = input("Option 3: ").strip()
+                   if not op3:
+                    print("\nOption 3 is required")
+                    continue
+                   break
+
+                while True:
+                 op4 = input("Option 4: ").strip()
+                 if not op4:
+                   print("\nOption 4 is required")
+                   continue
+                 break
+
+                while True:
+                  correct = input("Correct Answer: ").strip()
+                  if not correct:
+                    print("\nCorrect Answer is required")
+                    continue
+                  break
+                while True:
+                  difficulty = input(
+                  "Enter Difficulty (easy/medium/hard): "
+                     ).strip().lower()
+
+                  if not difficulty:
+                    print("\nDifficulty is required")
+                    continue
+
+                  if difficulty not in ["easy", "medium", "hard"]:
+                       print("\nWrong Difficulty Selected")
+                       continue
+
+                  break
               
-                marks = int(input("Enter Mark: "))
-                
-                question = input("Enter Question: ")
-                op1 = input("Option 1: ")
-                op2 = input("Option 2: ")
-                op3 = input("Option 3: ")
-                op4 = input("Option 4: ")
-                correct = input("Correct Answer: ")
-                difficulty = input("Enter Difficulty (easy/medium/hard): ").lower()
-                
                 if not all([question, op1, op2, op3, op4, correct]):
                   print("Error: Please fill all fields")
                   return
@@ -270,6 +371,7 @@ class MyQuiz:
                    ))
                    self.conn.commit()
                    print("\nQuestion Added Successfully")
+                   
                 else:
                     print("\nWrong Difficulty Selected ")
 
@@ -286,17 +388,36 @@ class MyQuiz:
 
             for c in categories:
              print(c)
+            
+            while True: 
+             cat_id = int(input("Select Subject : "))
+             if cat_id == 0:
+                print("Returning to Admin Menu...")
+                break
+        
+             self.cur.execute("Select question_id,question_text From questions Where categ_id=%s",(cat_id,) )
+             data = self.cur.fetchall()
+            
+             if len(data) == 0:
+                print("\nNot Found")
+                continue
+            
+             headers = ["Question ID", "Question"]
+             print("\n")
+             print(tabulate(data, headers=headers, tablefmt="grid"))
+            
+             qid = int(input("Enter Question id : (0 to Cancel) "))
+              
+             if qid == 0:
+                print("Delete Cancelled")
+                continue
+             self.cur.execute("DELETE FROM questions WHERE categ_id=%s AND question_id = %s", (cat_id,qid))
              
-            cat_id = int(input("Select Subject : "))
-            qid = int(input("Enter Question id : "))
+             self.conn.commit()
             
-            self.cur.execute("DELETE FROM questions WHERE categ_id=%s AND question_id = %s", (cat_id,qid))
-            
-            self.conn.commit()
-            
-            if self.cur.rowcount > 0:
+             if self.cur.rowcount > 0:
                 print("\nQuestion Deleted")
-            else:
+             else:
                 print("\nQuestion is Not Avialable")
         
         except Exception as e:
@@ -308,60 +429,91 @@ class MyQuiz:
       
       try:  
           
-        print("1. Show All Questions with Question id . ")
-        print("2.Show All Question with Options and Answer. ")
-        print("3.Show Questions for set. ")
+        self.cur.execute("Select * From categories")
+        categories = self.cur.fetchall()
         
-        choice = int(input("Enter Choice . "))
+        for c in categories:
+            
+            print(c)
+           
+        while True:     
+         categ = int(input("Select categories . "))
         
-        if choice == 1:
-            self.cur.execute("Select question_text From questions")
-            data = self.cur.fetchall()
+         if categ == 0:
+            print("Returnnig...") 
+            return
         
-            if len(data) == 0:
-             print("\nNo Questions Found")
-             return  
+        
+         self.cur.execute("SELECT * FROM categories WHERE categ_id = %s",(categ,))
+         check = self.cur.fetchone()
+        
+         if not check:
+            print("Invalid Category ! Try Again")
+            continue
+        
+         print("1. Show All Questions with Question id . ")
+         print("2.Show All Question with Options and Answer. ")
+         print("3.Show Questions for set. ")  
+         choice = int(input("Enter Choice . "))
+        
+         if choice == 1:
+            
+              print("\nThis is the Questions of Categoriey . ",categ)
+              self.cur.execute("Select question_id,question_text From questions Where categ_id=%s",(categ,))
+              data = self.cur.fetchall()
+        
+              if len(data) == 0:
+               print("\nNo Questions Found")
+               return  
          
-            for row in data:
-              print("Question:", row[0])
+            #   for row in data:
+            #    print("Question:", row[0])
+            
+              headers = ["Question ID", "Question"]
+              print("\n")
+              print(tabulate(data, headers=headers, tablefmt="grid"))
             
                 
-        elif choice == 2:
-         self.cur.execute("Select  * From questions")
-         data = self.cur.fetchall()
+         elif choice == 2:
+               self.cur.execute("Select  * From questions")
+               data = self.cur.fetchall()
         
-         if len(data) == 0:
-            print("\nNo Questions Found")
-            return  
+               if len(data) == 0:
+                print("\nNo Questions Found")
+                return  
            
-         for row in data:
-            print("\n------------------------")
-            print("ID:", row[0])
-            print("Category ID:", row[1])
-            print("Question:", row[2])
-            print("A:", row[3])
-            print("B:", row[4])
-            print("C:", row[5])
-            print("D:", row[6])
-            print("Correct Answer:", row[7])
-            print("Difficulty:", row[8])
-            print("------------------------")
+               for row in data:
+                print("\n------------------------")
+                print("ID:", row[0])
+                print("Category ID:", row[1])
+                print("Question:", row[2])
+                print("A:", row[3])
+                print("B:", row[4])
+                print("C:", row[5])
+                print("D:", row[6])
+                print("Correct Answer:", row[7])
+                print("Difficulty:", row[8])
+                print("------------------------")
+              
+                
+         elif choice == 3:
+             Set = int(input("Enter Set Number . "))
+             self.cur.execute("Select question_id, question_text From questions Where set_no= %s",(Set,))
+             data = self.cur.fetchall()
             
-        elif choice == 3:
-            Set = int(input("Enter Set Number . "))
-            self.cur.execute("Select question_text, question_text From questions Where set_no= %s",(Set,))
-            data = self.cur.fetchall()
             
-            
-            print("\n---------------------------------------------------------------------")  
-            if len(data) == 0:
-             print("\nNo Questions Found")
-             return  
+            #  print("\n---------------------------------------------------------------------")  
+             if len(data) == 0:
+              print("\nNo Questions Found")
+              return  
          
-            for row in data:
-              print("Question:", row[0])
+            #  for row in data:
+            #   print("Question ID :", row[0])
+            #   print("Question    :", row[1])
              
-            print("\n---------------------------------------------------------------------")  
+             headers = ["Question ID" , "Question"]
+             print(tabulate(data, headers=headers, tablefmt="grid"))
+            # print("\n---------------------------------------------------------------------")  
             
         else:
                 print("Wrong Input !")
@@ -376,24 +528,44 @@ class MyQuiz:
      try:
           self.cur.execute("SELECT * FROM categories")
           categories = self.cur.fetchall()
-
+          
+          print("\nAvailiable Categories")
           for c in categories:
             print(c)
-
-          categ_id = int(input("Select Category ID: "))
-          self.cur.execute("SELECT * FROM categories WHERE categ_id=%s", (categ_id,))
-          if not self.cur.fetchone():
+            
+          vali = [row[0] for row in categories]  
+          
+          while True:
+              
+           categ_id = int(input("Select Category ID: "))
+           self.cur.execute("SELECT * FROM categories WHERE categ_id=%s", (categ_id,))
+           if not self.cur.fetchone():
             print("Invalid Category ID")
-            return
+            continue
+           break
 
-          difficulty = input("Enter Difficulty (easy / medium / hard): ")
+          while True:
+             
+           difficulty = input("Enter Difficulty (easy / medium / hard): ")
           
-          if difficulty not in ["easy", "medium", "hard"]:
+           if difficulty not in ["easy", "medium", "hard"]:
             print("\nInvalid Difficulty")
-            return
+            continue
+           break
 
-          set_no = int(input("Enter Set No: "))
+          while True:
+           set_no = int(input("Enter Set No: "))
           
+           self.cur.execute("SELECT * FROM sets WHERE categ_id=%s AND set_no=%s",
+           (categ_id, set_no)
+           )
+          
+           data = self.cur.fetchone()
+
+           if not data:
+            print("Invalid Set Number. This set does not exist for selected category.")
+            continue
+           break
           
          
            
@@ -406,6 +578,9 @@ class MyQuiz:
         """, (categ_id, difficulty, set_no))
 
           questions = self.cur.fetchall()
+          
+          if not questions:
+              print("\nNo Question Found")
 
           score = 0
           total = 0
@@ -615,10 +790,19 @@ class MyQuiz:
     def Set(self):
      try:
         self.cur.execute("SELECT * FROM categories")
-        for row in self.cur.fetchall():
+        categories = self.cur.fetchall()
+        
+        for row in categories :
             print(row)
+        while True:
+         categ_id = int(input("Enter Category ID: "))
+         valid_ids = [row[0] for row in categories]
 
-        categ_id = int(input("Enter Category ID: "))
+         if categ_id not in valid_ids:
+            print("Invalid Choice! Category does not exist.")
+            continue
+         break 
+        
         setNo = int(input("Enter Set No: "))
 
         self.cur.execute(
@@ -645,17 +829,20 @@ class MyQuiz:
        
 q = MyQuiz()
 try:
+    while True :
         print("- - - - - - MENU - - - - - - \n")
         print("           1.USER    ")  
         print("           2.ADMIN    ") 
-        choice = int(input("Select : "))
+        print("           3.Exit    ")
+        choice = int(input("\nSelect : "))
         
         if choice == 1:
             q.User()
         elif choice == 2:
             q.AdminLogin()
         elif choice == 3:
-            print("Thanks")
+             break
+            
             
         
 except Exception as e:
